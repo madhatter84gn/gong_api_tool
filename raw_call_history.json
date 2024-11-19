@@ -59620,6 +59620,28 @@
     "calendarEventId": "7qngjnesejk0vi6e4qbi006tkr@google.com"
   },
   {
+    "id": "8213446333225387397",
+    "url": "https://us-13267.app.gong.io/call?id=8213446333225387397",
+    "title": "Frema/Dave Connect",
+    "scheduled": "2024-11-19T10:00:00-05:00",
+    "started": "2024-11-19T10:01:49.214-05:00",
+    "duration": 1201,
+    "primaryUserId": "2223795282017569580",
+    "direction": "Conference",
+    "system": "Zoom",
+    "scope": "External",
+    "media": "Video",
+    "language": "eng",
+    "workspaceId": "7744734895577036473",
+    "sdrDisposition": null,
+    "clientUniqueId": null,
+    "customData": null,
+    "purpose": null,
+    "meetingUrl": "https://us02web.zoom.us/j/83378404031",
+    "isPrivate": false,
+    "calendarEventId": "62e55uq193j00j5sn05davco8u@google.com"
+  },
+  {
     "id": "8690227815323235228",
     "url": "https://us-13267.app.gong.io/call?id=8690227815323235228",
     "title": "Tiffany / Lisa Sync Up!",

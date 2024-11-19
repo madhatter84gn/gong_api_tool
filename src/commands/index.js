@@ -9,7 +9,7 @@ import {
   withSpinner,
 } from "../utils/functional.js";
 
-export const getAllCallHistory = async ({ filename }) => {
+export const getAllRawCallHistory = async ({ filename }) => {
   // Create an async function to fetch and save call history
   const fetchAndSaveCallHistory = async () => {
     const calls = await getAllCalls();
@@ -66,7 +66,11 @@ export const interactive = async () => {
         type: "list",
         name: "action",
         message: "What would you like to do?",
-        choices: ["Get All Call History", "Get Detailed Call History", "Exit"],
+        choices: [
+          "Get All Raw Call History",
+          "Get Detailed Call History",
+          "Exit",
+        ],
       },
     ]);
     return action;
@@ -74,16 +78,16 @@ export const interactive = async () => {
 
   const handleAction = async (action) => {
     switch (action) {
-      case "Get All Call History": {
+      case "Get All Raw Call History": {
         const { filename } = await inquirer.prompt([
           {
             type: "input",
             name: "filename",
             message: "Enter output filename (or press enter for default):",
-            default: "call_history.json",
+            default: "raw_call_history.json",
           },
         ]);
-        await getAllCallHistory({ filename });
+        await getAllRawCallHistory({ filename });
         break;
       }
       case "Get Detailed Call History": {

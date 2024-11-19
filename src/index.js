@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import chalk from "chalk";
 import { validateEnvVariables } from "./utils/config.js";
 import {
-  getAllCallHistory,
+  getAllRawCallHistory,
   getDetailedCallHistory,
   interactive,
 } from "./commands/index.js";
