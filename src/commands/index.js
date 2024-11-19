@@ -1,34 +1,37 @@
-import ora from "ora";
 import chalk from "chalk";
 import inquirer from "inquirer";
+import { saveToFile } from "../utils/file.js";
 import { getAllCalls, getCallDetails } from "../api/client.js";
-import { pipe, tryCatch } from "../utils/functional.js";
-
-const withSpinner = (message) => async (fn) => {
-  const spinner = ora(message).start();
-  try {
-    const result = await fn();
-    spinner.succeed("Operation completed successfully");
-    return result;
-  } catch (error) {
-    spinner.fail("Operation failed");
-    throw error;
-  }
-};
+import {
+  createAsyncFunction,
+  pipe,
+  tryCatch,
+  withSpinner,
+} from "../utils/functional.js";
 
 export const getAllCallHistory = async ({ filename }) => {
-  const processCallHistory = pipe(getAllCalls, (data) =>
-    saveToFile(filename, data),
+  // Create an async function to fetch and save call history
+  const fetchAndSaveCallHistory = async () => {
+    const calls = await getAllCalls();
+    return saveToFile(filename, calls);
+  };
+
+  // Wrap the function with error handling
+  const handleCallHistory = tryCatch(
+    createAsyncFunction(fetchAndSaveCallHistory),
+    (error) => {
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    },
   );
 
-  const handleError = (error) => {
-    console.error(chalk.red(error.message));
-    process.exit(1);
-  };
-  await tryCatch(
-    withSpinner("Fetching call history...")(processCallHistory),
-    handleError,
-  )();
+  // Add spinner with error handling
+  const processWithSpinner = withSpinner("Fetching call history...")(
+    handleCallHistory,
+  );
+
+  // Execute the process
+  await processWithSpinner();
 };
 
 export const getDetailedCallHistory = async ({ id }) => {

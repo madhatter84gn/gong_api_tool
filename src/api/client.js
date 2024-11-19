@@ -47,10 +47,23 @@ const createApiCall = (config) => async (endpoint) => {
       config.baseURL += endpoint;
     }
 
-    const response = await axios(config);
-    return response.data;
+    const results = [];
+    let cursor = null;
+    do {
+      if (cursor) {
+        config.params = {
+          cursor: cursor,
+        };
+      }
+
+      const response = await axios(config);
+      const data = await response.data;
+      results.push(...(data.calls || []));
+      cursor = data.records.cursor || null;
+    } while (cursor);
+
+    return results;
   } catch (error) {
-    console.error(error);
     return handleApiError(error);
   }
 };
