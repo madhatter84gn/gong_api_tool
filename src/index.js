@@ -1,60 +1,34 @@
 #!/usr/bin/env node
 
-import inquirer from "inquirer";
+// src/index.js
+import { Command } from "commander";
 import dotenv from "dotenv";
-import { getCallHistory } from "./helpers/gong.js";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-import fs from "fs";
+import chalk from "chalk";
+import { validateEnvVariables } from "./utils/config.js";
+import {
+  getAllCallHistory,
+  getDetailedCallHistory,
+  interactive,
+} from "./commands/index.js";
 
-// Get the directory name of the current module
-// Load environment variables with specific path
-const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: join(__dirname, ".env") });
+dotenv.config();
 
-async function main() {
-  while (true) {
-    const { choice } = await inquirer.prompt([
-      {
-        type: "list",
-        name: "choice",
-        message: "What would you like to do?",
-        choices: [
-          "Get Call History",
-          "Get Call Video",
-          "Get Call Transcription",
-          "Exit",
-        ],
-      },
-    ]);
+validateEnvVariables();
 
-    if (choice === "Exit") {
-      console.log("Goodbye!");
-      break;
-    }
+const program = new Command();
 
-    switch (choice) {
-      case "Get Call History":
-        const history = await getCallHistory();
+program
+  .name("gong-cli")
+  .description("CLI application to manage call history")
+  .version("0.0.1");
 
-        const jsonData = JSON.stringify(history, null, 2);
-        fs.writeFile("gong_calls.json", jsonData, (err) => {
-          if (err) {
-            console.error("Error writing file:", err);
-          } else {
-            console.log("Data written to file successfully");
-          }
-        });
+program
+  .command("interactive")
+  .description("Run in interactive mode")
+  .action(interactive);
 
-        break;
-      case "Get Call Video":
-        await getCallVideo();
-        break;
-      case "Get Call Transcription":
-        await getCallTranscription();
-        break;
-    }
-  }
+if (process.argv.length === 2) {
+  interactive();
+} else {
+  program.parse();
 }
-
-main().catch(console.error);
