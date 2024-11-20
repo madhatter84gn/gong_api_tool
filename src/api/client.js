@@ -1,7 +1,7 @@
 import axios from "axios";
 import chalk from "chalk";
-import { pipe } from "../utils/functional.js";
-
+import { extensivePostBody } from "../utils/gong.js";
+import { progressReport } from "../utils/file.js";
 const createApiConfig = () => ({
   baseURL: process.env.BASE_URL || "https://api.example.com",
   headers: {
@@ -41,7 +41,7 @@ const handleApiError = (error) => {
   throw error;
 };
 
-const createApiCall = (config) => async (endpoint) => {
+const createApiCall = (config, body) => async (endpoint) => {
   try {
     if (endpoint) {
       config.baseURL += endpoint;
@@ -56,10 +56,16 @@ const createApiCall = (config) => async (endpoint) => {
         };
       }
 
-      const response = await axios(config);
+      if (body) {
+        config.data = body;
+        config.data.cursor = cursor;
+      }
+
+      const response = await axios(config, body);
       const data = await response.data;
       results.push(...(data.calls || []));
       cursor = data.records.cursor || null;
+      progressReport(data.records);
     } while (cursor);
 
     return results;
@@ -76,12 +82,14 @@ export const getAllCalls = async () => {
   const apiCall = createApiCall(config);
   return apiCall("/calls");
 };
-export const getCallDetails = async (callId = null) => {
+
+export const getCallDetails = async () => {
   const config = {
     ...createApiConfig(),
-    method: "GET",
+    method: "POST",
   };
-  const apiCall = createApiCall(config);
-  const endpoint = callId ? `/calls/${callId}` : "/calls/details";
+  const body = extensivePostBody;
+  const apiCall = createApiCall(config, body);
+  const endpoint = "/calls/extensive";
   return apiCall(endpoint);
 };

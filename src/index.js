@@ -7,7 +7,7 @@ import chalk from "chalk";
 import { validateEnvVariables } from "./utils/config.js";
 import {
   getAllRawCallHistory,
-  getDetailedCallHistory,
+  getAllExtensiveCallHistory,
   interactive,
 } from "./commands/index.js";
 

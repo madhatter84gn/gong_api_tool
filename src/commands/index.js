@@ -34,29 +34,30 @@ export const getAllRawCallHistory = async ({ filename }) => {
   await processWithSpinner();
 };
 
-export const getDetailedCallHistory = async ({ id }) => {
-  const processCallDetails = pipe(
-    () => getCallDetails(id),
-    (details) => {
-      console.log(
-        chalk.cyan("Call Details:"),
-        JSON.stringify(details, null, 2),
-      );
-      return details;
+export const getAllExtensiveCallHistory = async ({ filename }) => {
+  // Create an async function to fetch and save call history
+  const fetchAndSaveCallHistory = async () => {
+    const calls = await getCallDetails();
+    return saveToFile(filename, calls);
+  };
+
+  // Wrap the function with error handling
+  const handleCallHistory = tryCatch(
+    createAsyncFunction(fetchAndSaveCallHistory),
+    (error) => {
+      console.error(chalk.red(error.message));
+      process.exit(1);
     },
   );
 
-  const handleError = (error) => {
-    console.error(chalk.red(error.message));
-    process.exit(1);
-  };
+  // Add spinner with error handling
+  const processWithSpinner = withSpinner("Fetching call history...")(
+    handleCallHistory,
+  );
 
-  await tryCatch(
-    withSpinner("Fetching call details...")(processCallDetails),
-    handleError,
-  )();
+  // Execute the process
+  await processWithSpinner();
 };
-
 export const interactive = async () => {
   console.log(chalk.blue("Welcome to Call History CLI"));
 
@@ -68,7 +69,7 @@ export const interactive = async () => {
         message: "What would you like to do?",
         choices: [
           "Get All Raw Call History",
-          "Get Detailed Call History",
+          "Get Extensive Call History",
           "Exit",
         ],
       },
@@ -90,16 +91,16 @@ export const interactive = async () => {
         await getAllRawCallHistory({ filename });
         break;
       }
-      case "Get Detailed Call History": {
-        const { callId } = await inquirer.prompt([
+      case "Get Extensive Call History": {
+        const { filename } = await inquirer.prompt([
           {
             type: "input",
-            name: "callId",
-            message: "Enter call ID (or press enter for all details):",
-            default: null,
+            name: "filename",
+            message: "Enter output file name (or press enter for default):",
+            default: "raw_extensive_call_data.json",
           },
         ]);
-        await getDetailedCallHistory({ id: callId || null });
+        await getAllExtensiveCallHistory({ filename });
         break;
       }
       case "Exit":
