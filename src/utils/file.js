@@ -22,3 +22,14 @@ export const saveToFile = tryCatch(
     throw error;
   },
 );
+
+export const progressReport = async ({
+  totalRecords,
+  currentPageSize,
+  currentPageNumber,
+}) => {
+  console.info();
+  console.info("Total Records: ", totalRecords);
+  console.info("Current Page Size: ", currentPageSize);
+  console.info("Current Page Number: ", currentPageNumber);
+};
