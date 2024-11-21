@@ -12,12 +12,14 @@ const writeFile = async (filename, data) =>
 export const saveToFile = tryCatch(
   async (filename, data) => {
     await writeFile(filename, data);
+    console.log();
     console.log(
       chalk.green(`✔ Data successfully saved to ${getOutputPath(filename)}`),
     );
     return data;
   },
   (error) => {
+    console.log();
     console.error(chalk.red(`Error saving file: ${error.message}`));
     throw error;
   },

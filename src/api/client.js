@@ -41,7 +41,7 @@ const handleApiError = (error) => {
   throw error;
 };
 
-const createApiCall = (config, body) => async (endpoint) => {
+const createApiCall = (config) => async (endpoint) => {
   try {
     if (endpoint) {
       config.baseURL += endpoint;
@@ -49,19 +49,21 @@ const createApiCall = (config, body) => async (endpoint) => {
 
     const results = [];
     let cursor = null;
+
     do {
       if (cursor) {
-        config.params = {
-          cursor: cursor,
-        };
+        if (config.method === "GET") {
+          config.params = {
+            cursor: cursor,
+          };
+        }
+
+        if (config.method === "POST") {
+          config.data.cursor = cursor;
+        }
       }
 
-      if (body) {
-        config.data = body;
-        config.data.cursor = cursor;
-      }
-
-      const response = await axios(config, body);
+      const response = await axios(config);
       const data = await response.data;
       results.push(...(data.calls || []));
       cursor = data.records.cursor || null;
@@ -88,8 +90,8 @@ export const getCallDetails = async () => {
     ...createApiConfig(),
     method: "POST",
   };
-  const body = extensivePostBody;
-  const apiCall = createApiCall(config, body);
+  config.data = extensivePostBody;
+  const apiCall = createApiCall(config);
   const endpoint = "/calls/extensive";
   return apiCall(endpoint);
 };
