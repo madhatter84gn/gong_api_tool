@@ -4,7 +4,6 @@ import { saveToFile } from "../utils/file.js";
 import { getAllCalls, getCallDetails } from "../api/client.js";
 import {
   createAsyncFunction,
-  pipe,
   tryCatch,
   withSpinner,
 } from "../utils/functional.js";
@@ -58,6 +57,13 @@ export const getAllExtensiveCallHistory = async ({ filename }) => {
   // Execute the process
   await processWithSpinner();
 };
+
+export const downloadAssets = async () => {
+  const downloadAudioFile = async () => {
+    const audioFile = await downloadAsset();
+  };
+};
+
 export const interactive = async () => {
   console.log(chalk.blue("Welcome to Call History CLI"));
 
@@ -70,6 +76,7 @@ export const interactive = async () => {
         choices: [
           "Get All Raw Call History",
           "Get Extensive Call History",
+          "Download Audio/Video Assets",
           "Exit",
         ],
       },
@@ -101,6 +108,11 @@ export const interactive = async () => {
           },
         ]);
         await getAllExtensiveCallHistory({ filename });
+        break;
+      }
+      case "Download Audio/Video Assets": {
+        await downloadAssets();
+        console.log("Downloading assets");
         break;
       }
       case "Exit":
