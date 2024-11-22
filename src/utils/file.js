@@ -1,17 +1,25 @@
-import fs from "fs/promises";
+import fs from "fs";
 import path from "path";
 import chalk from "chalk";
 import { tryCatch } from "./functional.js";
 
 const getOutputPath = (filename) =>
-  path.isAbsolute(filename) ? filename : path.join(process.cwd(), filename);
+  path.isAbsolute(filename)
+    ? filename
+    : path.join(path.join(process.cwd(), "/output"), filename);
 
 const writeFile = async (filename, data) =>
   fs.writeFile(getOutputPath(filename), JSON.stringify(data, null, 2));
 
 export const saveToFile = tryCatch(
   async (filename, data) => {
-    await writeFile(filename, data);
+    const outputPath = getOutputPath(filename);
+    //TODO: Check/Create directory path
+    if (!fs.existsSync(outputPath)) {
+      fs.mkdirSync(outputPath, { recursive: true });
+    }
+
+    fs.writeFileSync(filename, JSON.stringify(data, null, 2));
     console.log();
     console.log(
       chalk.green(`✔ Data successfully saved to ${getOutputPath(filename)}`),
