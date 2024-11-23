@@ -1,25 +1,33 @@
 import fs from "fs";
+import axios from "axios";
 import path from "path";
 import chalk from "chalk";
 import { tryCatch } from "./functional.js";
 
+const getDirectoryPath = () => {
+  return path.join(process.cwd(), "/output");
+};
 const getOutputPath = (filename) =>
   path.isAbsolute(filename)
     ? filename
-    : path.join(path.join(process.cwd(), "/output"), filename);
+    : path.join(getDirectoryPath(), filename);
 
-const writeFile = async (filename, data) =>
-  fs.writeFile(getOutputPath(filename), JSON.stringify(data, null, 2));
+export const loadCallHistory = async (filename) => {
+  const filePath = getOutputPath(filename);
+  const rawData = await fs.promises.readFile(filePath, "utf8");
+  const parsedData = await JSON.parse(rawData);
+  return [...parsedData];
+};
 
 export const saveToFile = tryCatch(
   async (filename, data) => {
-    const outputPath = getOutputPath(filename);
-    //TODO: Check/Create directory path
-    if (!fs.existsSync(outputPath)) {
-      fs.mkdirSync(outputPath, { recursive: true });
+    const directoryPath = getDirectoryPath();
+    if (!fs.existsSync(directoryPath)) {
+      fs.mkdirSync(directoryPath, { recursive: true });
     }
 
-    fs.writeFileSync(filename, JSON.stringify(data, null, 2));
+    const filePath = getOutputPath(filename);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     console.log();
     console.log(
       chalk.green(`✔ Data successfully saved to ${getOutputPath(filename)}`),
@@ -43,3 +51,41 @@ export const progressReport = async ({
   console.info("Current Page Size: ", currentPageSize);
   console.info("Current Page Number: ", currentPageNumber);
 };
+
+export async function downloadFile(fileUrl) {
+  const directoryPath = getDirectoryPath();
+
+  if (!fs.existsSync(directoryPath)) {
+    fs.mkdirSync(directoryPath, { recursive: true });
+  }
+
+  const outputLocationPath = getOutputPath("test.mp4");
+  console.log("OUTPUTLOCATIONPATH: ", outputLocationPath);
+  const writer = fs.createWriteStream(outputLocationPath);
+
+  return axios({
+    method: "get",
+    url: fileUrl,
+    responseType: "stream",
+  }).then((response) => {
+    //ensure that the user can call `then()` only when the file has
+    //been downloaded entirely.
+
+    return new Promise((resolve, reject) => {
+      response.data.pipe(writer);
+      let error = null;
+      writer.on("error", (err) => {
+        error = err;
+        writer.close();
+        reject(err);
+      });
+      writer.on("close", () => {
+        if (!error) {
+          resolve(true);
+        }
+        //no need to call the reject here, as it will have been called in the
+        //'error' stream;
+      });
+    });
+  });
+}

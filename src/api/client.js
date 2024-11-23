@@ -1,7 +1,11 @@
 import axios from "axios";
 import chalk from "chalk";
 import { extensivePostBody } from "../utils/gong.js";
-import { progressReport } from "../utils/file.js";
+import {
+  progressReport,
+  loadCallHistory,
+  downloadFile,
+} from "../utils/file.js";
 const createApiConfig = () => ({
   baseURL: process.env.BASE_URL || "https://api.example.com",
   headers: {
@@ -94,4 +98,10 @@ export const getCallDetails = async () => {
   const apiCall = createApiCall(config);
   const endpoint = "/calls/extensive";
   return apiCall(endpoint);
+};
+
+export const getCallAssets = async (filename) => {
+  console.log("I HAVE A FILENAME: ", filename);
+  const calls = await loadCallHistory(filename);
+  return calls;
 };
