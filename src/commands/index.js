@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import inquirer from "inquirer";
 import { saveToFile } from "../utils/file.js";
-import { getAllCalls, getCallDetails } from "../api/client.js";
+import { getAllCalls, getCallDetails, getCallAssets } from "../api/client.js";
 import {
   createAsyncFunction,
   tryCatch,
@@ -58,10 +58,37 @@ export const getAllExtensiveCallHistory = async ({ filename }) => {
   await processWithSpinner();
 };
 
-export const downloadAssets = async () => {
-  const downloadAudioFile = async () => {
-    const audioFile = await downloadAsset();
+export const getAllCallAssets = async ({ filename }) => {
+  const fetchAndSaveCallAssets = async () => {
+    // Create an async function to fetch and save call history
+    //TODO:
+    //1. Load the extensive call json file
+    const callHistory = await getCallAssets(filename);
+    console.log(callHistory.length);
+    return callHistory;
+    //2. Foreach call
+    //3. create folder structure
+    //4. get video download
+    //5. name it appropriately
+    //6. write the stream
+    //7 repeat 5-7 for audio files
+    //8. once download successful write to a report so that if we need to batch this we know where we left off
   };
+  const handleAssetRetrieval = tryCatch(
+    createAsyncFunction(fetchAndSaveCallAssets),
+    (error) => {
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    },
+  );
+
+  // Add spinner with error handling
+  const processWithSpinner = withSpinner("Fetching call assets...")(
+    handleAssetRetrieval,
+  );
+
+  // Execute the process
+  await processWithSpinner();
 };
 
 export const interactive = async () => {
@@ -111,8 +138,16 @@ export const interactive = async () => {
         break;
       }
       case "Download Audio/Video Assets": {
-        await downloadAssets();
-        console.log("Downloading assets");
+        const { filename } = await inquirer.prompt([
+          {
+            type: "input",
+            name: "filename",
+            message:
+              "Enter extensive call file name (or press enter for default):",
+            default: "raw_extensive_call_data.json",
+          },
+        ]);
+        await getAllCallAssets({ filename });
         break;
       }
       case "Exit":
