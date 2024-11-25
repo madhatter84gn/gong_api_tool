@@ -7,6 +7,7 @@ import { tryCatch } from "./functional.js";
 const getDirectoryPath = () => {
   return path.join(process.cwd(), "/output");
 };
+
 const getOutputPath = (filename) =>
   path.isAbsolute(filename)
     ? filename
@@ -19,12 +20,16 @@ export const loadCallHistory = async (filename) => {
   return [...parsedData];
 };
 
+export const existsOrCreateDirectory = () => {
+  const directoryPath = getDirectoryPath();
+  if (!fs.existsSync(directoryPath)) {
+    fs.mkdirSync(directoryPath, { recursive: true });
+  }
+};
+
 export const saveToFile = tryCatch(
   async (filename, data) => {
-    const directoryPath = getDirectoryPath();
-    if (!fs.existsSync(directoryPath)) {
-      fs.mkdirSync(directoryPath, { recursive: true });
-    }
+    existsOrCreateDirectory();
 
     const filePath = getOutputPath(filename);
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
@@ -53,11 +58,7 @@ export const progressReport = async ({
 };
 
 export async function downloadFile(fileUrl) {
-  const directoryPath = getDirectoryPath();
-
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true });
-  }
+  existsOrCreateDirectory();
 
   const outputLocationPath = getOutputPath("test.mp4");
   console.log("OUTPUTLOCATIONPATH: ", outputLocationPath);
@@ -83,8 +84,6 @@ export async function downloadFile(fileUrl) {
         if (!error) {
           resolve(true);
         }
-        //no need to call the reject here, as it will have been called in the
-        //'error' stream;
       });
     });
   });
