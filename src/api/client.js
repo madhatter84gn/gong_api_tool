@@ -100,8 +100,4 @@ export const getCallDetails = async () => {
   return apiCall(endpoint);
 };
 
-export const getCallAssets = async (filename) => {
-  console.log("I HAVE A FILENAME: ", filename);
-  const calls = await loadCallHistory(filename);
-  return calls;
-};
+export const getCallAssets = async (filename) => {};

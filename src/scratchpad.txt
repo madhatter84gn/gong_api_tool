@@ -1,0 +1,11 @@
+getAllCallAssets
+  ->
+    1. Read in the raw extensive call history file
+    2. Process Each call
+    ->
+      1. Create folder structure
+      2. Download the video file
+      3. Download the audio file
+    3. If download successful
+      -> 1. Add line item to report file
+

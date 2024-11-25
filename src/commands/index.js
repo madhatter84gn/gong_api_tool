@@ -1,7 +1,9 @@
 import chalk from "chalk";
 import inquirer from "inquirer";
 import { saveToFile } from "../utils/file.js";
-import { getAllCalls, getCallDetails, getCallAssets } from "../api/client.js";
+import { loadCallHistory } from "../utils/file.js";
+import { processCallRecord } from "../utils/call.js";
+import { getAllCalls, getCallDetails } from "../api/client.js";
 import {
   createAsyncFunction,
   tryCatch,
@@ -60,19 +62,12 @@ export const getAllExtensiveCallHistory = async ({ filename }) => {
 
 export const getAllCallAssets = async ({ filename }) => {
   const fetchAndSaveCallAssets = async () => {
-    // Create an async function to fetch and save call history
-    //TODO:
-    //1. Load the extensive call json file
-    const callHistory = await getCallAssets(filename);
-    console.log(callHistory.length);
-    return callHistory;
-    //2. Foreach call
-    //3. create folder structure
-    //4. get video download
-    //5. name it appropriately
-    //6. write the stream
-    //7 repeat 5-7 for audio files
-    //8. once download successful write to a report so that if we need to batch this we know where we left off
+    const calls = await loadCallHistory(filename);
+    const report = { status: "Successful" };
+    calls.forEach((call) => {
+      const x = processCallRecord(call);
+    });
+    return report;
   };
   const handleAssetRetrieval = tryCatch(
     createAsyncFunction(fetchAndSaveCallAssets),
