@@ -63,10 +63,15 @@ export const getAllExtensiveCallHistory = async ({ filename }) => {
 export const getAllCallAssets = async ({ filename }) => {
   const fetchAndSaveCallAssets = async () => {
     const calls = await loadCallHistory(filename);
-    const report = { status: "Successful" };
-    calls.forEach((call) => {
-      const x = processCallRecord(call);
-    });
+    const report = { status: "Successful", todo: "Process Call Records" };
+    await processCallRecord(calls[0]);
+
+    //TODO: Process all calls once end to end works
+    //calls.forEach((call) => {
+    //const x = processCallRecord(call);
+    // });
+
+    console.log("REPORT: ", report);
     return report;
   };
   const handleAssetRetrieval = tryCatch(
