@@ -1,8 +1,14 @@
 import chalk from "chalk";
 import inquirer from "inquirer";
-import { recordBatchResults, splitIntoBatches } from "../utils/helper.js";
+import {
+  recordBatchResults,
+  removeAllreadyProcessedCalls,
+  splitIntoBatches,
+} from "../utils/helper.js";
 import { saveToFile } from "../utils/file.js";
-import { loadCallHistory } from "../utils/file.js";
+import path from "path";
+import fs from "fs";
+import { getDirectoryPath, loadCallHistory } from "../utils/file.js";
 import { processCallRecord } from "../utils/call.js";
 import { getAllCalls, getCallDetails } from "../api/client.js";
 import {
@@ -73,7 +79,28 @@ const processBatch = async (batch) => {
 export const getAllCallAssets = async ({ filename }) => {
   const fetchAndSaveCallAssets = async () => {
     const calls = await loadCallHistory(filename);
-    const batches = await splitIntoBatches(calls);
+
+    const dir = getDirectoryPath();
+    const filepath = path.join(dir, "results.json");
+    let allReadyRetrieved = null;
+    let callsToProcess = calls;
+
+    if (fs.existsSync(filepath)) {
+      allReadyRetrieved = await loadCallHistory("results.json");
+
+      callsToProcess = await removeAllreadyProcessedCalls(
+        calls,
+        allReadyRetrieved,
+      );
+
+      if (callsToProcess.length === 0) {
+        console.log();
+        console.log("No calls to process....");
+      }
+    }
+
+    const batches = await splitIntoBatches(callsToProcess);
+
     let batchResults = null;
     for (const [batchIndex, batch] of batches.entries()) {
       try {
