@@ -67,7 +67,7 @@ export const saveToFile = tryCatch(
     existsOrCreateDirectory();
 
     const filePath = getOutputPath(filename);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), { flag: "a" });
     console.log();
     console.log(
       chalk.green(`✔ Data successfully saved to ${getOutputPath(filename)}`),

@@ -3,7 +3,7 @@ import { createMediaPath, getDirectoryPath } from "../utils/file.js";
 import { downloadAsset } from "../api/client.js";
 export const processCallRecord = async (record) => {
   const { metaData, media } = { ...record };
-  const { title, scheduled, meetingUrl, audioUrl, videoUrl } = {
+  const { title, scheduled, id, audioUrl, videoUrl } = {
     ...metaData,
     ...media,
   };
@@ -16,8 +16,15 @@ export const processCallRecord = async (record) => {
     }),
   );
 
-  await downloadMediaAssets({ fullPathToMedia, title, audioUrl, videoUrl });
-  return;
+  const results = await downloadMediaAssets({
+    fullPathToMedia,
+    title,
+    audioUrl,
+    videoUrl,
+  });
+
+  const callRecordResult = { id, results: Object.assign({}, ...results) };
+  return callRecordResult;
 };
 
 const validateCreateMediaPath = async ({ title, scheduled: schedule }) => {
@@ -26,22 +33,28 @@ const validateCreateMediaPath = async ({ title, scheduled: schedule }) => {
 };
 
 const downloadMediaAssets = async ({ audioUrl, videoUrl, fullPathToMedia }) => {
+  const results = [];
   try {
     if (audioUrl) {
       const filename = `${fullPathToMedia}/audio.mp3`;
       await downloadAsset(audioUrl, filename);
+      results.push({ audioUrl, success: true });
     }
+  } catch (error) {
+    results.push({ audioUrl, success: false });
+  }
 
+  try {
     if (videoUrl) {
       const filename = `${fullPathToMedia}/video.mp4`;
       await downloadAsset(videoUrl, filename);
+      results.push({ videoUrl, success: true });
     }
   } catch (error) {
-    console.error(error);
+    results.push({ videoUrl, success: false });
   }
 
-  // TODO: Need to pass back both urls and success/failure of download
-  return;
+  return results;
 };
 
 const parseTimestamp = (timestamp) => {
@@ -52,9 +65,4 @@ const parseTimestamp = (timestamp) => {
     month: date.getMonth() + 1,
     day: date.getDate(),
   };
-};
-
-const createDownloadLocation = (dateDetail) => {
-  const outputPath = getDirectoryPath;
-  console.log(outputPath);
 };
