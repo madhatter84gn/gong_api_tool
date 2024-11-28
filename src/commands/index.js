@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import inquirer from "inquirer";
+import { splitIntoBatches } from "../utils/helper.js";
 import { saveToFile } from "../utils/file.js";
 import { loadCallHistory } from "../utils/file.js";
 import { processCallRecord } from "../utils/call.js";
@@ -60,18 +61,43 @@ export const getAllExtensiveCallHistory = async ({ filename }) => {
   await processWithSpinner();
 };
 
+const processBatch = async (batch) => {
+  const batchResults = await Promise.all(
+    batch.map(async (call) => {
+      return await processCallRecord(call);
+    }),
+  );
+  return batchResults;
+};
+
 export const getAllCallAssets = async ({ filename }) => {
   const fetchAndSaveCallAssets = async () => {
     const calls = await loadCallHistory(filename);
-    const report = { status: "Successful", todo: "Process Call Records" };
-    await processCallRecord(calls[0]);
+
+    const batches = await splitIntoBatches(calls);
+    const results = [];
+    for (const [batchIndex, batch] of batches.entries()) {
+      try {
+        const batchResults = await processBatch(batch);
+        results.push(batchResults);
+        console.log(
+          `Batch: ${batchIndex + 1} of ${batches.length} process successfully.`,
+        );
+      } catch (error) {
+        throw new Error(`Error processing batch ${batchIndex + 1}: `, error);
+      } finally {
+        saveToFile("results.json", results);
+      }
+    }
+
+    throw new Error();
 
     //TODO: Process all calls once end to end works
     //calls.forEach((call) => {
     //const x = processCallRecord(call);
     // });
 
-    console.log("REPORT: ", report);
+    await processCallRecord(calls[0]);
     return report;
   };
   const handleAssetRetrieval = tryCatch(
@@ -87,7 +113,6 @@ export const getAllCallAssets = async ({ filename }) => {
     handleAssetRetrieval,
   );
 
-  // Execute the process
   await processWithSpinner();
 };
 

@@ -7,6 +7,7 @@ import { progressReport } from "../utils/file.js";
 import { promisify } from "util";
 import { pipeline } from "stream";
 import fs from "fs";
+
 const createApiConfig = () => ({
   baseURL: process.env.BASE_URL || "https://api.example.com",
   headers: {
