@@ -1,5 +1,4 @@
 import fs from "fs";
-import axios from "axios";
 import path from "path";
 import chalk from "chalk";
 import { tryCatch } from "./functional.js";
@@ -67,7 +66,7 @@ export const saveToFile = tryCatch(
     existsOrCreateDirectory();
 
     const filePath = getOutputPath(filename);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), { flag: "a" });
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     console.log();
     console.log(
       chalk.green(`✔ Data successfully saved to ${getOutputPath(filename)}`),
