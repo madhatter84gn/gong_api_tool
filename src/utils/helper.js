@@ -20,3 +20,11 @@ export const recordBatchResults = async (results) => {
     await saveToFile(filepath, allResults);
   }
 };
+
+export const removeAllreadyProcessedCalls = async (
+  callList,
+  processedCalls,
+) => {
+  const idsToRemove = new Set(processedCalls.map((item) => item.id));
+  return callList.filter((item) => !idsToRemove.has(item.metaData.id));
+};
